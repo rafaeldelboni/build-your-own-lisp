@@ -10,16 +10,6 @@ include(CTest)
 include(FetchContent)
 set(FETCHCONTENT_QUIET 0)
 
-# Download / Include Unity Test Runner
-IF(IS_SETUP)
-  FetchContent_Declare(
-    unity
-    GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-    GIT_TAG        master)
-
-  FetchContent_MakeAvailable(unity)
-ENDIF()
-
 # Enable GNU readline functionality provided by the editline library
 find_package(editline REQUIRED)
 
@@ -66,7 +56,7 @@ add_subdirectory(src)
 
 # CTest sets BUILD_TESTING option to ON by default.
 # Test-related configuration goes here.
-if (BUILD_TESTING)
+if (DEFINED ENV{BUILD_TESTING})
   enable_testing()
   add_subdirectory(test)
 endif()
