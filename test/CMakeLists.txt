@@ -8,15 +8,18 @@ FetchContent_MakeAvailable(unity)
 
 # 1. Declare the test file
 set(Tests
-  lib_test)
+  #lib_test
+  )
 
 # 2. Declare dependencies of each test file
 set(lib_test_deps
-  lib)
+  #lib
+  )
 
 # 3. Add dependencies to a list, need to be in the same order as item 1
 set(Dependencies
-  lib_test_deps)
+  #lib_test_deps
+  )
 
 # Config
 set(SC_BUILD_TEST OFF)

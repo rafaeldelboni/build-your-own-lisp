@@ -10,6 +10,21 @@ include(CTest)
 include(FetchContent)
 set(FETCHCONTENT_QUIET 0)
 
+# Download / Include MPC library
+FetchContent_Declare(
+  mpc_fetch
+  GIT_REPOSITORY https://github.com/orangeduck/mpc.git
+  GIT_TAG        65f20a1a0b3249a475efa8ecb7b5ecd2c1c071c4)
+FetchContent_GetProperties(mpc_fetch)
+if(NOT mpc_fetch_POPULATED)
+  FetchContent_Populate(mpc_fetch)
+  add_library(
+    mpc STATIC
+    ${mpc_fetch_SOURCE_DIR}/mpc.c
+    ${mpc_fetch_SOURCE_DIR}/mpc.h)
+  target_include_directories(mpc PUBLIC ${mpc_fetch_SOURCE_DIR})
+endif()
+
 # Enable GNU readline functionality provided by the editline library
 find_package(editline REQUIRED)
 

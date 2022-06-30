@@ -48,7 +48,7 @@ make clean
 # Debug main bin
 make run
 # Debug prompt bin
-make run bin=prompt
+make run bin=doge_code
 
 # Release bin
 ./build/release/bin/main
