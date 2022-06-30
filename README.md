@@ -45,8 +45,11 @@ make clean
 
 ### Run Binary
 ```bash
-# Debug bin
-./build/debug/bin/main
+# Debug main bin
+make run
+# Debug prompt bin
+make run bin=prompt
+
 # Release bin
 ./build/release/bin/main
 ```

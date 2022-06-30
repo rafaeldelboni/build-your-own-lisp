@@ -1,21 +1,27 @@
 cmake_minimum_required(VERSION 3.21)
 
+project(build-your-own-lisp)
+
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
-
-project(build-your-own-lisp)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(CTest)
 include(FetchContent)
 set(FETCHCONTENT_QUIET 0)
 
 # Download / Include Unity Test Runner
-FetchContent_Declare(
-  unity
-  GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-  GIT_TAG        master)
+IF(IS_SETUP)
+  FetchContent_Declare(
+    unity
+    GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
+    GIT_TAG        master)
 
-FetchContent_MakeAvailable(unity)
+  FetchContent_MakeAvailable(unity)
+ENDIF()
+
+# Enable GNU readline functionality provided by the editline library
+find_package(editline REQUIRED)
 
 # Output directory structure configuration.
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
