@@ -57,8 +57,12 @@ ENDIF()
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 FILE(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/compile_commands.json" sourceJson)
 FILE(TO_NATIVE_PATH "${PROJECT_SOURCE_DIR}/build/compile_commands.json" destinationJson)
-configure_file(${sourceJson} ${destinationJson} COPYONLY)
 
+if(EXISTS ${sourceJson})
+  configure_file(${sourceJson} ${destinationJson} COPYONLY)
+endif ()
+
+# Link libraries to all targets added later
 if(UNIX)
   link_libraries(m)
 endif(UNIX)
