@@ -1,7 +1,7 @@
+#include "lispy.h"
 #include "mpc.h"
 #include <editline/readline.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char **argv) {
   /* Create Some Parsers */
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
   mpca_lang(MPCA_LANG_DEFAULT, language, Number, Operator, Expr, Lispy);
 
   /* Print Version and Exit information */
-  puts("Lispy Version 0.0.1");
+  puts("Lispy Version 0.0.3");
   puts("Press Ctrl+c to Exit\n");
 
   /* In a never endind loop */
@@ -32,15 +32,16 @@ int main(int argc, char **argv) {
     add_history(input);
 
     /* Attempt to Parse the user Input */
-    mpc_result_t result;
-    if (mpc_parse("<stdin>", input, Lispy, &result)) {
-      /* On Success Print the AST */
-      mpc_ast_print(result.output);
-      mpc_ast_delete(result.output);
+    mpc_result_t mpc_result;
+    if (mpc_parse("<stdin>", input, Lispy, &mpc_result)) {
+      /* On Success Print the result of the evaluation*/
+      long eval_result = eval(mpc_result.output);
+      printf("%li\n", eval_result);
+      mpc_ast_delete(mpc_result.output);
     } else {
       /* Otherwise Print the Error */
-      mpc_err_print(result.output);
-      mpc_err_delete(result.output);
+      mpc_err_print(mpc_result.output);
+      mpc_err_delete(mpc_result.output);
     }
 
     /* Free retrieved input */

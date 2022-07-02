@@ -11,7 +11,6 @@ release:
 	make --no-print-directory -C build/release -j
 .PHONY: release
 
-test: export BUILD_TESTING = ON
 test:
 	make --no-print-directory -C build/debug -j
 	make --no-print-directory -C build/debug test ARGS='--output-on-failure'

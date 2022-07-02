@@ -53,6 +53,11 @@ ELSE()
     )
 ENDIF()
 
+# Link libraries to all targets added later
+if(UNIX)
+  link_libraries(m)
+endif(UNIX)
+
 # Generates a compile_commands.json file containing the exact compiler calls
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 FILE(TO_NATIVE_PATH "${PROJECT_BINARY_DIR}/compile_commands.json" sourceJson)
@@ -62,11 +67,6 @@ if(EXISTS ${sourceJson})
   configure_file(${sourceJson} ${destinationJson} COPYONLY)
 endif ()
 
-# Link libraries to all targets added later
-if(UNIX)
-  link_libraries(m)
-endif(UNIX)
-
 # Project-wide include directory configuration.
 include_directories("${PROJECT_SOURCE_DIR}/src")
 
@@ -75,7 +75,8 @@ add_subdirectory(src)
 
 # CTest sets BUILD_TESTING option to ON by default.
 # Test-related configuration goes here.
-if (DEFINED ENV{BUILD_TESTING})
+if (BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
+
