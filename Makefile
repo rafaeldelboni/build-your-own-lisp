@@ -25,5 +25,5 @@ clean:
 run: bin := $(if $(bin),$(bin),main)
 run:
 	make --no-print-directory -C build/debug -j
-	./build/debug/bin/$(bin)
+	./build/debug/bin/$(bin) $(args)
 .PHONY: run
