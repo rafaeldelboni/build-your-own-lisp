@@ -7,13 +7,18 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(unity)
 
 # 1. Declare the test file
-set(Tests lispy_test)
+set(Tests
+  lispy_test
+  lval_test)
 
 # 2. Declare dependencies of each test file
 set(lispy_test_deps lispy)
+set(lval_test_deps lval)
 
 # 3. Add dependencies to a list, need to be in the same order as item 1
-set(Dependencies lispy_test_deps)
+set(Dependencies
+  lispy_test_deps
+  lval_test_deps)
 
 # Config
 set(SC_BUILD_TEST OFF)

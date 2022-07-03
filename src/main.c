@@ -10,11 +10,11 @@ int main(int argc, char **argv) {
   mpc_parser_t *Expr = mpc_new("expr");
   mpc_parser_t *Lispy = mpc_new("lispy");
   const char *language = " \
-              number: /-?[0-9]+/ ; \
-              operator: '+' | '-' | '*' | '/' ; \
-              expr: <number> | '(' <operator> <expr>+ ')' ; \
-              lispy: /^/ <operator> <expr>+ /$/ ; \
-            ";
+    number: /-?[0-9]+/ ; \
+    operator: '+' | '-' | '*' | '/' | '%' | '^' | \"min\" | \"max\"; \
+    expr: <number> | '(' <operator> <expr>+ ')' ; \
+    lispy: /^/ <operator> <expr>+ /$/ ; \
+  ";
 
   /* Define them with the following Language */
   mpca_lang(MPCA_LANG_DEFAULT, language, Number, Operator, Expr, Lispy);
@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
     mpc_result_t mpc_result;
     if (mpc_parse("<stdin>", input, Lispy, &mpc_result)) {
       /* On Success Print the result of the evaluation*/
-      long eval_result = eval(mpc_result.output);
-      printf("%li\n", eval_result);
+      lval eval_result = eval(mpc_result.output);
+      printf("%s\n", lval_string(eval_result));
       mpc_ast_delete(mpc_result.output);
     } else {
       /* Otherwise Print the Error */

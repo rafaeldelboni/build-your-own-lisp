@@ -1,4 +1,5 @@
+#include "lval.h"
 #include "mpc.h"
 
-long eval_op(long x, char* op, long y);
-long eval(mpc_ast_t *tree);
+lval eval_op(lval x, char *op, lval y);
+lval eval(mpc_ast_t *tree);
