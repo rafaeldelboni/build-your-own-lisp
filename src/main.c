@@ -5,22 +5,25 @@
 
 int main(int argc, char **argv) {
   /* Create Some Parsers */
+  mpc_parser_t *Float = mpc_new("float");
   mpc_parser_t *Number = mpc_new("number");
   mpc_parser_t *Operator = mpc_new("operator");
   mpc_parser_t *Expr = mpc_new("expr");
   mpc_parser_t *Lispy = mpc_new("lispy");
+
   const char *language = " \
-    number: /-?[0-9]+(\\.[0-9]+)?/ ; \
+    float: /-?[0-9]+\\.[0-9]+/ ; \
+    number: /-?[0-9]+/ ; \
     operator: '+' | '-' | '*' | '/' | '%' | '^' | \"min\" | \"max\"; \
-    expr: <number> | '(' <operator> <expr>+ ')' ; \
+    expr: <float> | <number> | '(' <operator> <expr>+ ')' ; \
     lispy: /^/ <operator> <expr>+ /$/ ; \
   ";
 
   /* Define them with the following Language */
-  mpca_lang(MPCA_LANG_DEFAULT, language, Number, Operator, Expr, Lispy);
+  mpca_lang(MPCA_LANG_DEFAULT, language, Float, Number, Operator, Expr, Lispy);
 
   /* Print Version and Exit information */
-  puts("Lispy Version 0.0.3");
+  puts("Lispy Version 0.0.4");
   puts("Press Ctrl+c to Exit\n");
 
   /* In a never endind loop */

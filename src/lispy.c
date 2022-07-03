@@ -75,16 +75,15 @@ lval eval(mpc_ast_t *tree) {
   /* If tagged as number return it directly. */
 
   if (strstr(tree->tag, "number")) {
-    /* If value has a '.' then is a float */
-    if (strstr(tree->contents, ".")) {
-      errno = 0;
-      double x = strtod(tree->contents, NULL);
-      return errno != ERANGE ? lval_double(x) : lval_err(LERR_BAD_NUM);
-    } else {
-      errno = 0;
-      long x = strtol(tree->contents, NULL, 10);
-      return errno != ERANGE ? lval_long(x) : lval_err(LERR_BAD_NUM);
-    }
+    errno = 0;
+    long x = strtol(tree->contents, NULL, 10);
+    return errno != ERANGE ? lval_long(x) : lval_err(LERR_BAD_NUM);
+  }
+
+  if (strstr(tree->tag, "float")) {
+    errno = 0;
+    double x = strtod(tree->contents, NULL);
+    return errno != ERANGE ? lval_double(x) : lval_err(LERR_BAD_NUM);
   }
 
   /* The operator is aways second child. */

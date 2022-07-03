@@ -21,7 +21,7 @@ void test_eval_double(void) {
   mpc_ast_t *trunk;
   trunk = mpc_ast_build(
       4, ">", mpc_ast_new("regex", ""), mpc_ast_new("operator", "+"),
-      mpc_ast_new("expr|number", "3.6"), mpc_ast_new("expr|number", "2.4"));
+      mpc_ast_new("expr|float", "3.6"), mpc_ast_new("expr|float", "2.4"));
 
   TEST_ASSERT_EQUAL_FLOAT(6, eval(trunk).val_double);
   TEST_ASSERT_EQUAL_INT(LVAL_DOUBLE, eval(trunk).type);
