@@ -1,10 +1,24 @@
 #include "lispy.h"
 #include <errno.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 lval eval_op(lval x, char *op, lval y) {
+  int double_result = x.type == LVAL_DOUBLE || y.type == LVAL_DOUBLE;
+
+  long x_long, y_long;
+  double x_double, y_double;
+
+  if (double_result) {
+    x_double = x.type == LVAL_LONG ? (double)x.val_long : x.val_double;
+    y_double = y.type == LVAL_LONG ? (double)y.val_long : y.val_double;
+  } else {
+    x_long = x.val_long;
+    y_long = y.val_long;
+  }
+
   /* If either value is an error return it */
   if (x.type == LVAL_ERR) {
     return x;
@@ -15,32 +29,43 @@ lval eval_op(lval x, char *op, lval y) {
 
   /* Other wise do maths on the number values */
   if (strcmp(op, "+") == 0) {
-    return lval_num(x.num + y.num);
+    return double_result ? lval_double(x_double + y_double)
+                         : lval_long(x_long + y_long);
   };
   if (strcmp(op, "-") == 0) {
-    return lval_num(x.num - y.num);
+    return double_result ? lval_double(x_double - y_double)
+                         : lval_long(x_long - y_long);
   };
   if (strcmp(op, "*") == 0) {
-    return lval_num(x.num * y.num);
+    return double_result ? lval_double(x_double * y_double)
+                         : lval_long(x_long * y_long);
   };
   if (strcmp(op, "/") == 0) {
     /* If second operand is zero return error */
-    return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_num(x.num / y.num);
+    if (double_result) {
+      return y_double == 0 ? lval_err(LERR_DIV_ZERO)
+                           : lval_double(x_double / y_double);
+    } else {
+      return y_long == 0 ? lval_err(LERR_DIV_ZERO) : lval_long(x_long / y_long);
+    }
   };
   if (strcmp(op, "%") == 0) {
-    return lval_num(x.num % y.num);
+    return double_result ? lval_double((long)x_double % (long)y_double)
+                         : lval_long(x_long % y_long);
   };
   if (strcmp(op, "^") == 0) {
-    long power = pow(x.num, y.num);
-    return lval_num(power);
+    return double_result ? lval_double(pow(x_double, y_double))
+                         : lval_long(pow(x_long, y_long));
   };
   if (strcmp(op, "min") == 0) {
-    long min = x.num < y.num ? x.num : y.num;
-    return lval_num(min);
+    return double_result
+               ? lval_double(x_double < y_double ? x_double : y_double)
+               : lval_long(x_long < y_long ? x_long : y_long);
   };
   if (strcmp(op, "max") == 0) {
-    long max = x.num > y.num ? x.num : y.num;
-    return lval_num(max);
+    return double_result
+               ? lval_double(x_double > y_double ? x_double : y_double)
+               : lval_long(x_long > y_long ? x_long : y_long);
   };
 
   return lval_err(LERR_BAD_OP);
@@ -48,11 +73,18 @@ lval eval_op(lval x, char *op, lval y) {
 
 lval eval(mpc_ast_t *tree) {
   /* If tagged as number return it directly. */
+
   if (strstr(tree->tag, "number")) {
-    /* Checks if there is some error in conversion */
-    errno = 0;
-    long x = strtol(tree->contents, NULL, 10);
-    return errno != ERANGE ? lval_num(x) : lval_err(LERR_BAD_NUM);
+    /* If value has a '.' then is a float */
+    if (strstr(tree->contents, ".")) {
+      errno = 0;
+      double x = strtod(tree->contents, NULL);
+      return errno != ERANGE ? lval_double(x) : lval_err(LERR_BAD_NUM);
+    } else {
+      errno = 0;
+      long x = strtol(tree->contents, NULL, 10);
+      return errno != ERANGE ? lval_long(x) : lval_err(LERR_BAD_NUM);
+    }
   }
 
   /* The operator is aways second child. */

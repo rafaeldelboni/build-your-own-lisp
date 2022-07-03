@@ -1,10 +1,19 @@
 #include "lval.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-lval lval_num(long x) {
+lval lval_long(long x) {
   lval value;
-  value.type = LVAL_NUM;
-  value.num = x;
+  value.type = LVAL_LONG;
+  value.val_long = x;
+  return value;
+}
+
+lval lval_double(double x) {
+  lval value;
+  value.type = LVAL_DOUBLE;
+  value.val_double = x;
   return value;
 }
 
@@ -15,30 +24,37 @@ lval lval_err(int x) {
   return value;
 }
 
-const char *lval_string(lval value) {
-  char *buffer;
-
+void lval_string(lval value, char *output) {
   switch (value.type) {
-  /* In the case the type is a number print it */
-  /* Then 'break' out of the switch*/
-  case LVAL_NUM:
-    snprintf(buffer, 11, "%ld", value.num);
+  /* MAX Long (9223372036854775807) has ~20 digits */
+  case LVAL_LONG:
+    snprintf(output, 20, "%ld", value.val_long);
+    break;
+
+  /* MAX Double (1.8 x 10^308) has ~310 decimal digits */
+  case LVAL_DOUBLE:
+    snprintf(output, 310, "%lf", value.val_double);
     break;
 
   /* In the case the typeis an error */
   case LVAL_ERR:
-    /* Check what type of error it is and print it */
+    /* Check what type of error it is and return it */
     if (value.err == LERR_DIV_ZERO) {
-      buffer = "Error: Division By Zero!";
+      strncpy(output, "Error: Division By Zero!", 25);
     }
     if (value.err == LERR_BAD_OP) {
-      buffer = "Error: Invalid Operator!";
+      strncpy(output, "Error: Invalid Operator!", 25);
     }
     if (value.err == LERR_BAD_NUM) {
-      buffer = "Error: Invalid Number!";
+      strncpy(output, "Error: Invalid Number!", 25);
     }
     break;
   }
+}
 
-  return buffer;
+void lval_println(lval value) {
+  char *output = (char *)malloc(sizeof(char) * 4);
+  lval_string(value, output);
+  printf("%s\n", output);
+  free(output);
 }

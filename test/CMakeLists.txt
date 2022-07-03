@@ -20,9 +20,6 @@ set(Dependencies
   lispy_test_deps
   lval_test_deps)
 
-# Config
-set(SC_BUILD_TEST OFF)
-
 ###################################################################
 
 foreach(tst deps IN ZIP_LISTS Tests Dependencies)
