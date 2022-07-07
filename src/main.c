@@ -7,20 +7,23 @@ int main(int argc, char **argv) {
   /* Create Some Parsers */
   mpc_parser_t *Float = mpc_new("float");
   mpc_parser_t *Number = mpc_new("number");
-  mpc_parser_t *Operator = mpc_new("operator");
+  mpc_parser_t *Symbol = mpc_new("symbol");
+  mpc_parser_t *Sexpr = mpc_new("sexpr");
   mpc_parser_t *Expr = mpc_new("expr");
   mpc_parser_t *Lispy = mpc_new("lispy");
 
   const char *language = " \
     float: /-?[0-9]+\\.[0-9]+/ ; \
     number: /-?[0-9]+/ ; \
-    operator: '+' | '-' | '*' | '/' | '%' | '^' | \"min\" | \"max\"; \
-    expr: <float> | <number> | '(' <operator> <expr>+ ')' ; \
-    lispy: /^/ <operator> <expr>+ /$/ ; \
+    symbol: '+' | '-' | '*' | '/' | '%' | '^' | \"min\" | \"max\"; \
+    sexpr: '(' <expr>* ')' ;\
+    expr: <float> | <number> | <symbol> | <sexpr> ; \
+    lispy: /^/ <expr>* /$/ ; \
   ";
 
   /* Define them with the following Language */
-  mpca_lang(MPCA_LANG_DEFAULT, language, Float, Number, Operator, Expr, Lispy);
+  mpca_lang(MPCA_LANG_DEFAULT, language, Float, Number, Symbol, Sexpr, Expr,
+            Lispy);
 
   /* Print Version and Exit information */
   puts("Lispy Version 0.0.4");
@@ -37,9 +40,10 @@ int main(int argc, char **argv) {
     /* Attempt to Parse the user Input */
     mpc_result_t mpc_result;
     if (mpc_parse("<stdin>", input, Lispy, &mpc_result)) {
+      /*mpc_ast_print(mpc_result.output);*/
       /* On Success Print the result of the evaluation*/
-      lval eval_result = eval(mpc_result.output);
-      lval_println(eval_result);
+      lval *eval_read = lval_eval(lispy_read(mpc_result.output));
+      lval_println(eval_read);
       mpc_ast_delete(mpc_result.output);
     } else {
       /* Otherwise Print the Error */
@@ -52,7 +56,7 @@ int main(int argc, char **argv) {
   }
 
   /* Undefine and Delete our Parsers */
-  mpc_cleanup(4, Number, Operator, Expr, Lispy);
+  mpc_cleanup(6, Float, Number, Symbol, Sexpr, Expr, Lispy);
 
   return 0;
 }
