@@ -118,7 +118,6 @@ void lval_println(lval *value) {
   putchar('\n');
 }
 
-// TODO: unit test
 lval *lval_pop(lval *value, int i) {
   /* Find the item at "i" */
   lval *poped = value->cell[i];
@@ -136,7 +135,6 @@ lval *lval_pop(lval *value, int i) {
   return poped;
 }
 
-// TODO: unit test
 lval *lval_take(lval *value, int i) {
   lval *taken = lval_pop(value, i);
   lval_del(value);
@@ -210,7 +208,6 @@ lval *lval_eval_op(lval *x, char *op, lval *y) {
   return lval_err("Invalid operand!");
 }
 
-// TODO: unit test
 lval *lval_builtin_op(lval *value, char *op) {
   /* Ensure all argument are number */
   for (int i = 0; i < value->count; i++) {
@@ -247,7 +244,6 @@ lval *lval_builtin_op(lval *value, char *op) {
   return x;
 }
 
-// TODO: unit test
 lval *lval_eval(lval *value) {
   /* Evaluate Sexpressions */
   if (value->type == LVAL_SEXPR) {
@@ -257,7 +253,6 @@ lval *lval_eval(lval *value) {
   return value;
 }
 
-// TODO: unit test
 lval *lval_eval_sexpr(lval *value) {
   /* Evaluate Children */
   for (int i = 0; i < value->count; i++) {
