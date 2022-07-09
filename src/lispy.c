@@ -36,6 +36,9 @@ lval *lispy_read(mpc_ast_t *tree) {
   if (strstr(tree->tag, "sexpr")) {
     value = lval_sexpr();
   }
+  if (strstr(tree->tag, "qexpr")) {
+    value = lval_qexpr();
+  }
 
   /* Fill this list with any valid expression contained within */
   for (int i = 0; i < tree->children_num; i++) {
@@ -43,6 +46,12 @@ lval *lispy_read(mpc_ast_t *tree) {
       continue;
     }
     if (strcmp(tree->children[i]->contents, ")") == 0) {
+      continue;
+    }
+    if (strcmp(tree->children[i]->contents, "{") == 0) {
+      continue;
+    }
+    if (strcmp(tree->children[i]->contents, "}") == 0) {
       continue;
     }
     if (strcmp(tree->children[i]->tag, "regex") == 0) {

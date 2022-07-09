@@ -1,11 +1,14 @@
+#ifndef LVAL_HEADER_H
+#define LVAL_HEADER_H
+
 /* Create Enumeration of Possible lval Types */
-enum { LVAL_ERR, LVAL_LONG, LVAL_DOUBLE, LVAL_SYM, LVAL_SEXPR };
+enum { LVAL_ERR, LVAL_LONG, LVAL_DOUBLE, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
 /* Create Enumeration of Possible Error Types */
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
 /* Declare New lval Struct */
-typedef struct lval{
+typedef struct lval {
   int type;
   /* Union allows to store different data types in the same memory location */
   union {
@@ -16,7 +19,7 @@ typedef struct lval{
   };
   /* Count and Pointer to a list of "lval*" */
   int count;
-  struct lval** cell;
+  struct lval **cell;
 } lval;
 
 /* Create a new number type lval */
@@ -26,13 +29,16 @@ lval *lval_long(long l);
 lval *lval_double(double d);
 
 /* Create a new error type lval */
-lval *lval_err(char* error_str);
+lval *lval_err(char *error_str);
 
 /* Construct a pointer to a new Symbol lval */
-lval *lval_sym(char* s);
+lval *lval_sym(char *s);
 
 /* A pointer to a new empty Sexpr lval*/
 lval *lval_sexpr(void);
+
+/* A pointer to a new empty Qexpr lval */
+lval *lval_qexpr(void);
 
 lval *lval_add(lval *parent, lval *child);
 
@@ -44,15 +50,8 @@ void lval_expr_print(lval *value, char open, char close);
 
 void lval_println(lval *value);
 
-
 lval *lval_pop(lval *value, int i);
 
 lval *lval_take(lval *value, int i);
 
-lval *lval_eval_op(lval *x, char *op, lval *y);
-
-lval *lval_builtin_op(lval *value, char *op);
-
-lval *lval_eval(lval *value);
-
-lval *lval_eval_sexpr(lval *value);
+#endif // LVAL_HEADER_H

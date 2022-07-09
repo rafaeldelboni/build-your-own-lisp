@@ -9,16 +9,19 @@ FetchContent_MakeAvailable(unity)
 # 1. Declare the test file
 set(Tests
   lispy_test
-  lval_test)
+  lval_test
+  builtin_test)
 
 # 2. Declare dependencies of each test file
 set(lispy_test_deps lispy)
 set(lval_test_deps lval)
+set(builtin_test_deps builtin)
 
 # 3. Add dependencies to a list, need to be in the same order as item 1
 set(Dependencies
   lispy_test_deps
-  lval_test_deps)
+  lval_test_deps
+  builtin_test_deps)
 
 ###################################################################
 
