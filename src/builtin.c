@@ -1,4 +1,5 @@
 #include "builtin.h"
+#include "lval.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +44,6 @@ lval *builtin_eval(lval *arg) {
   LASSERT(arg, arg->cell[0]->type == LVAL_QEXPR,
           "Function 'eval' passed incorrect type!");
 
-  printf("val-symbol:          %s\n", arg->cell[0]->val_symbol);
   lval *value = lval_take(arg, 0);
   value->type = LVAL_SEXPR;
   return builtin_lval_eval(value);
@@ -72,6 +72,49 @@ lval *builtin_join(lval *arg) {
   }
 
   lval_del(arg);
+  return value;
+}
+
+lval *builtin_cons(lval *arg) {
+  LASSERT(arg, arg->count == 2, "Function 'cons' passed too many arguments!");
+  LASSERT(arg,
+          arg->cell[0]->type == LVAL_LONG || arg->cell[0]->type == LVAL_DOUBLE,
+          "Function 'cons' passed incorrect type for input value!");
+  LASSERT(arg, arg->cell[1]->type == LVAL_QEXPR,
+          "Function 'cons' passed incorrect type for input qexpr!");
+  LASSERT(arg, arg->cell[1]->count != 0,
+          "Function 'cons' passed {} for input qexpr!");
+
+  lval *input = lval_pop(arg, 0);
+  lval *value = lval_qexpr();
+  value = lval_add(value, input);
+
+  while (arg->count) {
+    value = builtin_join_xy(value, lval_pop(arg, 0));
+  }
+
+  lval_del(arg);
+  return value;
+}
+
+lval *builtin_len(lval *arg) {
+  LASSERT(arg, arg->count == 1, "Function 'len' passed too many arguments!");
+  LASSERT(arg, arg->cell[0]->type == LVAL_QEXPR,
+          "Function 'len' passed incorrect type!");
+
+  lval *value = lval_long(arg->cell[0]->count);
+  lval_del(arg);
+  return value;
+}
+
+lval *builtin_init(lval *arg) {
+  LASSERT(arg, arg->count == 1, "Function 'init' passed too many arguments!");
+  LASSERT(arg, arg->cell[0]->type == LVAL_QEXPR,
+          "Function 'init' passed incorrect type!");
+  LASSERT(arg, arg->cell[0]->count != 0, "Function 'init' passed {}!");
+
+  lval *value = lval_take(arg, 0);
+  lval_del(lval_pop(value, (value->count - 1)));
   return value;
 }
 
@@ -179,6 +222,9 @@ lval *builtin_op(lval *value, char *op) {
 }
 
 lval *builtin_functions(lval *arg, char *func) {
+  if ((strcmp("eval", func) == 0)) {
+    return builtin_eval(arg);
+  }
   if ((strcmp("list", func) == 0)) {
     return builtin_list(arg);
   }
@@ -191,8 +237,14 @@ lval *builtin_functions(lval *arg, char *func) {
   if ((strcmp("join", func) == 0)) {
     return builtin_join(arg);
   }
-  if ((strcmp("eval", func) == 0)) {
-    return builtin_eval(arg);
+  if ((strcmp("cons", func) == 0)) {
+    return builtin_cons(arg);
+  }
+  if ((strcmp("len", func) == 0)) {
+    return builtin_len(arg);
+  }
+  if ((strcmp("init", func) == 0)) {
+    return builtin_init(arg);
   }
   if ((strcmp("min", func) == 0) || (strcmp("max", func) == 0) ||
       (strstr("+-*/%^", func))) {

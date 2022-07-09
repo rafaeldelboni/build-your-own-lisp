@@ -8,6 +8,12 @@ lval *builtin_list(lval *arg);
 
 lval *builtin_join(lval *arg);
 
+lval *builtin_cons(lval *arg);
+
+lval *builtin_len(lval *arg);
+
+lval *builtin_init(lval *arg);
+
 lval *builtin_eval(lval *value);
 
 lval *builtin_op(lval *value, char *op);

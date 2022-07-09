@@ -214,6 +214,62 @@ void test_builtin_join(void) {
   lval_del(test_calc);
 }
 
+void test_builtin_cons(void) {
+  lval *test_input = lval_long(1);
+  lval *test_list = lval_qexpr();
+  lval_add(test_list, lval_long(2));
+  lval_add(test_list, lval_long(3));
+  lval_add(test_list, lval_long(4));
+
+  lval *test_parent = lval_sexpr();
+  lval_add(test_parent, test_input);
+  lval_add(test_parent, test_list);
+
+  lval *test_calc = builtin_cons(test_parent);
+  TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
+  TEST_ASSERT_EQUAL_INT(4, test_calc->count);
+  TEST_ASSERT_EQUAL_INT(1, test_calc->cell[0]->val_long);
+  TEST_ASSERT_EQUAL_INT(2, test_calc->cell[1]->val_long);
+  TEST_ASSERT_EQUAL_INT(3, test_calc->cell[2]->val_long);
+  TEST_ASSERT_EQUAL_INT(4, test_calc->cell[3]->val_long);
+
+  lval_del(test_calc);
+}
+
+void test_builtin_len(void) {
+  lval *test_value = lval_qexpr();
+  lval_add(test_value, lval_long(2));
+  lval_add(test_value, lval_long(2));
+  lval_add(test_value, lval_long(2));
+
+  lval *test_value_parent = lval_sexpr();
+  lval_add(test_value_parent, test_value);
+
+  lval *test_calc = builtin_len(test_value_parent);
+  TEST_ASSERT_EQUAL_INT(LVAL_LONG, test_calc->type);
+  TEST_ASSERT_EQUAL_INT(3, test_calc->val_long);
+
+  lval_del(test_calc);
+}
+
+void test_builtin_init(void) {
+  lval *test_value = lval_qexpr();
+  lval_add(test_value, lval_long(3));
+  lval_add(test_value, lval_long(2));
+  lval_add(test_value, lval_long(1));
+
+  lval *test_value_parent = lval_sexpr();
+  lval_add(test_value_parent, test_value);
+
+  lval *test_calc = builtin_init(test_value_parent);
+  TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
+  TEST_ASSERT_EQUAL_INT(2, test_calc->count);
+  TEST_ASSERT_EQUAL_INT(3, test_calc->cell[0]->val_long);
+  TEST_ASSERT_EQUAL_INT(2, test_calc->cell[1]->val_long);
+
+  lval_del(test_calc);
+}
+
 int main(void) {
   UNITY_BEGIN();
 
@@ -229,6 +285,9 @@ int main(void) {
   RUN_TEST(test_builtin_list);
   RUN_TEST(test_builtin_eval);
   RUN_TEST(test_builtin_join);
+  RUN_TEST(test_builtin_cons);
+  RUN_TEST(test_builtin_len);
+  RUN_TEST(test_builtin_init);
 
   return UNITY_END();
 }

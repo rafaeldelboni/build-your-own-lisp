@@ -1,6 +1,6 @@
-#include "lval.h"
 #include "builtin.h"
 #include "lispy.h"
+#include "lval.h"
 #include "mpc.h"
 #include <editline/readline.h>
 #include <stdio.h>
@@ -18,7 +18,8 @@ int main(int argc, char **argv) {
   const char *language = " \
     float: /-?[0-9]+\\.[0-9]+/ ; \
     number: /-?[0-9]+/ ; \
-    symbol:  \"eval\" | \"list\" | \"head\" | \"tail\" | \"join\" \
+    symbol:  \"eval\" | \"list\" | \"head\" | \"tail\" | \"join\" |\
+             \"cons\" | \"len\" | \"init\" |\
              \"min\" | \"max\" | '+' | '-' | '*' | '/' | '%' | '^' | ; \
     sexpr: '(' <expr>* ')' ;\
     qexpr: '{' <expr>* '}' ;\
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
   }
 
   /* Undefine and Delete our Parsers */
-  mpc_cleanup(6, Float, Number, Symbol, Sexpr, Expr, Lispy);
+  mpc_cleanup(6, Float, Number, Symbol, Sexpr, Qexpr, Expr, Lispy);
 
   return 0;
 }
