@@ -2,16 +2,21 @@
 #include "unity.h"
 #include <stdlib.h>
 
-void setUp(void) {}
+lenv *env;
 
-void tearDown(void) {}
+void setUp(void) {
+  env = lenv_new();
+  builtin_default_functions(env);
+}
+
+void tearDown(void) { lenv_del(env); }
 
 void test_builtin_op(void) {
   lval *test_value = lval_sexpr();
   lval_add(test_value, lval_long(1));
   lval_add(test_value, lval_long(2));
   lval_add(test_value, lval_long(3));
-  lval *test_calc = builtin_op(test_value, "+");
+  lval *test_calc = builtin_op(env, test_value, "+");
   TEST_ASSERT_EQUAL_INT(6, test_calc->val_long);
   lval_del(test_calc);
 }
@@ -19,7 +24,7 @@ void test_builtin_op(void) {
 void test_builtin_op_err(void) {
   lval *test_value = lval_sexpr();
   lval_add(test_value, lval_sym("fun"));
-  lval *test_calc = builtin_op(test_value, "+");
+  lval *test_calc = builtin_op(env, test_value, "+");
   TEST_ASSERT_EQUAL_STRING("Cannot operate on non-number!", test_calc->val_err);
   lval_del(test_calc);
 }
@@ -27,7 +32,7 @@ void test_builtin_op_err(void) {
 void test_builtin_op_negation(void) {
   lval *test_value = lval_sexpr();
   lval_add(test_value, lval_long(1));
-  lval *test_calc = builtin_op(test_value, "-");
+  lval *test_calc = builtin_op(env, test_value, "-");
   TEST_ASSERT_EQUAL_INT(-1, test_calc->val_long);
   lval_del(test_calc);
 }
@@ -39,15 +44,15 @@ void test_do_eval(void) {
   lval_add(test_value, lval_long(1));
   lval_add(test_value, lval_long(2));
   lval_add(test_value, lval_long(3));
-  lval *test_eval = builtin_lval_eval(test_value);
+  lval *test_eval = builtin_lval_eval(env, test_value);
   TEST_ASSERT_EQUAL_INT(6, test_eval->val_long);
   lval_del(test_eval);
 
   /* Empty Expression */
-  TEST_ASSERT_EQUAL_INT(LVAL_SEXPR, builtin_lval_eval(lval_sexpr())->type);
+  TEST_ASSERT_EQUAL_INT(LVAL_SEXPR, builtin_lval_eval(env, lval_sexpr())->type);
 
   /* Single Expression */
-  TEST_ASSERT_EQUAL_INT(2, builtin_lval_eval(lval_long(2))->val_long);
+  TEST_ASSERT_EQUAL_INT(2, builtin_lval_eval(env, lval_long(2))->val_long);
 }
 
 void test_eval_err(void) {
@@ -57,7 +62,7 @@ void test_eval_err(void) {
   lval_add(test_value, lval_long(1));
   lval_add(test_value, lval_sym("-"));
   lval_add(test_value, lval_long(3));
-  lval *test_eval = builtin_lval_eval(test_value);
+  lval *test_eval = builtin_lval_eval(env, test_value);
   TEST_ASSERT_EQUAL_STRING("Cannot operate on non-number!", test_eval->val_err);
   lval_del(test_eval);
 
@@ -65,8 +70,8 @@ void test_eval_err(void) {
   lval *test_value_2 = lval_sexpr();
   lval_add(test_value_2, lval_long(1));
   lval_add(test_value_2, lval_long(2));
-  lval *test_eval_2 = builtin_lval_eval(test_value_2);
-  TEST_ASSERT_EQUAL_STRING("S-expression Does not start with symbol!",
+  lval *test_eval_2 = builtin_lval_eval(env, test_value_2);
+  TEST_ASSERT_EQUAL_STRING("First element is not a function",
                            test_eval_2->val_err);
   lval_del(test_eval_2);
 }
@@ -142,7 +147,7 @@ void test_builtin_head(void) {
   lval *test_value_parent = lval_sexpr();
   lval_add(test_value_parent, test_value);
 
-  lval *test_calc = builtin_head(test_value_parent);
+  lval *test_calc = builtin_head(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(1, test_calc->cell[0]->val_long);
 
   lval_del(test_calc);
@@ -157,7 +162,7 @@ void test_builtin_tail(void) {
   lval *test_value_parent = lval_sexpr();
   lval_add(test_value_parent, test_value);
 
-  lval *test_calc = builtin_tail(test_value_parent);
+  lval *test_calc = builtin_tail(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(2, test_calc->cell[0]->val_long);
   TEST_ASSERT_EQUAL_INT(3, test_calc->cell[1]->val_long);
 
@@ -170,7 +175,7 @@ void test_builtin_list(void) {
   lval_add(test_value, lval_long(2));
   lval_add(test_value, lval_long(3));
 
-  lval *test_calc = builtin_list(test_value);
+  lval *test_calc = builtin_list(env, test_value);
   TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
 
   lval_del(test_calc);
@@ -185,7 +190,7 @@ void test_builtin_eval(void) {
   lval *test_value_parent = lval_sexpr();
   test_value_parent = lval_add(test_value_parent, test_value);
 
-  lval *test_calc = builtin_eval(test_value_parent);
+  lval *test_calc = builtin_eval(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(5, test_calc->val_long);
 
   lval_del(test_calc);
@@ -206,7 +211,7 @@ void test_builtin_join(void) {
   lval_add(test_value_parent, test_value_1);
   lval_add(test_value_parent, test_value_2);
 
-  lval *test_calc = builtin_join(test_value_parent);
+  lval *test_calc = builtin_join(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
   TEST_ASSERT_EQUAL_INT(6, test_calc->count);
   TEST_ASSERT_EQUAL_INT(4, test_calc->cell[3]->val_long);
@@ -225,7 +230,7 @@ void test_builtin_cons(void) {
   lval_add(test_parent, test_input);
   lval_add(test_parent, test_list);
 
-  lval *test_calc = builtin_cons(test_parent);
+  lval *test_calc = builtin_cons(env, test_parent);
   TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
   TEST_ASSERT_EQUAL_INT(4, test_calc->count);
   TEST_ASSERT_EQUAL_INT(1, test_calc->cell[0]->val_long);
@@ -245,7 +250,7 @@ void test_builtin_len(void) {
   lval *test_value_parent = lval_sexpr();
   lval_add(test_value_parent, test_value);
 
-  lval *test_calc = builtin_len(test_value_parent);
+  lval *test_calc = builtin_len(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(LVAL_LONG, test_calc->type);
   TEST_ASSERT_EQUAL_INT(3, test_calc->val_long);
 
@@ -261,7 +266,7 @@ void test_builtin_init(void) {
   lval *test_value_parent = lval_sexpr();
   lval_add(test_value_parent, test_value);
 
-  lval *test_calc = builtin_init(test_value_parent);
+  lval *test_calc = builtin_init(env, test_value_parent);
   TEST_ASSERT_EQUAL_INT(LVAL_QEXPR, test_calc->type);
   TEST_ASSERT_EQUAL_INT(2, test_calc->count);
   TEST_ASSERT_EQUAL_INT(3, test_calc->cell[0]->val_long);

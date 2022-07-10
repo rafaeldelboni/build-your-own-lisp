@@ -90,6 +90,22 @@ void test_lval_take(void) {
   lval_del(test_take);
 }
 
+void test_lval_copy(void) {
+  lval *test_value = lval_sexpr();
+  lval_add(test_value, lval_sym("+"));
+  lval_add(test_value, lval_long(1));
+  lval_add(test_value, lval_long(2));
+  lval_add(test_value, lval_long(3));
+  lval *test_copy = lval_copy(test_value);
+
+  TEST_ASSERT_EQUAL_INT(4, test_copy->count);
+  TEST_ASSERT_EQUAL_STRING(test_value->cell[0]->val_symbol, test_copy->cell[0]->val_symbol);
+  TEST_ASSERT_EQUAL_INT(test_value->cell[1]->val_long, test_copy->cell[1]->val_long);
+  TEST_ASSERT_EQUAL_INT(test_value->cell[2]->val_long, test_copy->cell[2]->val_long);
+  TEST_ASSERT_EQUAL_INT(test_value->cell[3]->val_long, test_copy->cell[3]->val_long);
+  lval_del(test_value);
+}
+
 int main(void) {
   UNITY_BEGIN();
 
@@ -102,6 +118,7 @@ int main(void) {
   RUN_TEST(test_lval_add);
   RUN_TEST(test_lval_pop);
   RUN_TEST(test_lval_take);
+  RUN_TEST(test_lval_copy);
 
   return UNITY_END();
 }

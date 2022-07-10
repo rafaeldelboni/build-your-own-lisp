@@ -18,9 +18,7 @@ int main(int argc, char **argv) {
   const char *language = " \
     float: /-?[0-9]+\\.[0-9]+/ ; \
     number: /-?[0-9]+/ ; \
-    symbol:  \"eval\" | \"list\" | \"head\" | \"tail\" | \"join\" |\
-             \"cons\" | \"len\" | \"init\" |\
-             \"min\" | \"max\" | '+' | '-' | '*' | '/' | '%' | '^' | ; \
+    symbol: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ; \
     sexpr: '(' <expr>* ')' ;\
     qexpr: '{' <expr>* '}' ;\
     expr: <float> | <number> | <symbol> | <sexpr> | <qexpr> ; \
@@ -32,8 +30,12 @@ int main(int argc, char **argv) {
             Expr, Lispy);
 
   /* Print Version and Exit information */
-  puts("Lispy Version 0.0.4");
+  puts("Lispy Version 0.0.11");
   puts("Press Ctrl+c to Exit\n");
+
+  /* Create the state of the actual env */
+  lenv *env = lenv_new();
+  builtin_default_functions(env);
 
   /* In a never endind loop */
   while (1) {
@@ -48,7 +50,7 @@ int main(int argc, char **argv) {
     if (mpc_parse("<stdin>", input, Lispy, &mpc_result)) {
       /*mpc_ast_print(mpc_result.output);*/
       /* On Success Print the result of the evaluation*/
-      lval *eval_read = builtin_lval_eval(lispy_read(mpc_result.output));
+      lval *eval_read = builtin_lval_eval(env, lispy_read(mpc_result.output));
       lval_println(eval_read);
       mpc_ast_delete(mpc_result.output);
     } else {
@@ -60,6 +62,9 @@ int main(int argc, char **argv) {
     /* Free retrieved input */
     free(input);
   }
+
+  /* Free state environment */
+  lenv_del(env);
 
   /* Undefine and Delete our Parsers */
   mpc_cleanup(6, Float, Number, Symbol, Sexpr, Qexpr, Expr, Lispy);

@@ -2,6 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+
+char *lval_ltype_name(int type) {
+  switch (type) {
+    case LVAL_ERR: return "Error";
+    case LVAL_LONG: return "Integer";
+    case LVAL_DOUBLE: return "Float";
+    case LVAL_SYM: return "Symbol";
+    case LVAL_FUN: return "Function";
+    case LVAL_SEXPR: return "S-Expression";
+    case LVAL_QEXPR: return "Q-Expression";
+    default: return "Unknown";
+  };
+}
 
 lval *lval_long(long l) {
   lval *value = malloc(sizeof(lval));
@@ -25,6 +39,14 @@ lval *lval_sym(char *s) {
   return value;
 }
 
+// TODO: unit test
+lval *lval_fun(lbuiltin *func) {
+  lval *value = malloc(sizeof(lval));
+  value->type = LVAL_FUN;
+  value->val_fun = func;
+  return value;
+}
+
 lval *lval_sexpr(void) {
   lval *value = malloc(sizeof(lval));
   value->type = LVAL_SEXPR;
@@ -41,11 +63,26 @@ lval *lval_qexpr(void) {
   return value;
 }
 
-lval *lval_err(char *e) {
+lval *lval_err(char *fmt, ...) {
   lval *value = malloc(sizeof(lval));
   value->type = LVAL_ERR;
-  value->val_err = malloc(strlen(e) + 1);
-  strcpy(value->val_err, e);
+
+  /* Create a variable argument list and initialize it */
+  va_list var_args;
+  va_start(var_args, fmt);
+
+  /* Allocate 512 bytes of space */
+  value->val_err = malloc(512);
+
+  /* printf the error string with a maximum of 511 characters) */
+  vsnprintf(value->val_err, 511, fmt, var_args);
+
+  /* Reallocate to number of bytes actually used */
+  value->val_err = realloc(value->val_err, strlen(value->val_err) + 1);
+
+  /* Cleanup our variable argument list */
+  va_end(var_args);
+
   return value;
 }
 
@@ -58,10 +95,12 @@ lval *lval_add(lval *parent, lval *child) {
 
 void lval_del(lval *value) {
   switch (value->type) {
-  /* Do nothin special for number type */
+  /* Do nothin special for number, float and function type */
   case LVAL_LONG:
     break;
   case LVAL_DOUBLE:
+    break;
+  case LVAL_FUN:
     break;
 
   /* For Err or Sym free the string data */
@@ -87,6 +126,48 @@ void lval_del(lval *value) {
   free(value);
 }
 
+lval *lval_copy(lval *value) {
+  lval *copy = malloc(sizeof(lval));
+  copy->type = value->type;
+
+  switch (value->type) {
+
+  /* Copy Functions, Numbers and Floats Directly */
+  case LVAL_FUN:
+    copy->val_fun = value->val_fun;
+    break;
+  case LVAL_LONG:
+    copy->val_long = value->val_long;
+    break;
+  case LVAL_DOUBLE:
+    copy->val_double = value->val_double;
+    break;
+
+  /* Copy String using malloc and strcpy */
+  case LVAL_ERR:
+    copy->val_err = malloc(strlen(value->val_err) + 1);
+    strcpy(copy->val_err, value->val_err);
+    break;
+
+  case LVAL_SYM:
+    copy->val_symbol = malloc(strlen(value->val_symbol) + 1);
+    strcpy(copy->val_symbol, value->val_symbol);
+    break;
+
+  /* Copy Lists by copying each sub-expression */
+  case LVAL_SEXPR:
+  case LVAL_QEXPR:
+    copy->count = value->count;
+    copy->cell = malloc(sizeof(lval *) * copy->count);
+    for (int i = 0; i < copy->count; i++) {
+      copy->cell[i] = lval_copy(value->cell[i]);
+    }
+    break;
+  }
+
+  return copy;
+}
+
 void lval_print(lval *value) {
   switch (value->type) {
   case LVAL_LONG:
@@ -100,6 +181,9 @@ void lval_print(lval *value) {
     break;
   case LVAL_SYM:
     printf("%s", value->val_symbol);
+    break;
+  case LVAL_FUN:
+    printf("<function>");
     break;
   case LVAL_SEXPR:
     lval_expr_print(value, '(', ')');
