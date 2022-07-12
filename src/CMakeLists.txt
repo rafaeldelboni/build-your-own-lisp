@@ -1,4 +1,5 @@
 add_library(lval STATIC lval.c)
+target_link_libraries(lval lenv)
 
 add_library(lenv STATIC lenv.c)
 target_link_libraries(lenv lval)

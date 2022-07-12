@@ -17,7 +17,7 @@ enum {
   LVAL_QEXPR
 };
 
-typedef lval *(lbuiltin)(lenv *, lval *);
+typedef lval *(*lbuiltin)(lenv *, lval *);
 
 /* Declare New lval Struct */
 typedef struct lval {
@@ -27,8 +27,14 @@ typedef struct lval {
     long val_long;
     double val_double;
     char *val_symbol;
-    lbuiltin *val_fun;
+    // lbuiltin val_fun;
     char *val_err;
+    struct {
+      lbuiltin builtin;
+      lenv *env;
+      lval *formals;
+      lval *body;
+    } val_fun;
   };
   /* Count and Pointer to a list of "lval*" */
   int count;
@@ -50,7 +56,8 @@ lval *lval_err(char *fmt, ...);
 lval *lval_sym(char *s);
 
 /* Construct a pointer to a new Function lval */
-lval *lval_fun(lbuiltin *func);
+lval *lval_fun(lbuiltin func);
+lval *lval_lambda(lval *formals, lval *body);
 
 /* A pointer to a new empty Sexpr lval*/
 lval *lval_sexpr(void);

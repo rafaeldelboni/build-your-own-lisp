@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
             Expr, Lispy);
 
   /* Print Version and Exit information */
-  puts("Lispy Version 0.0.11");
+  puts("Lispy Version 0.0.12");
   puts("Press Ctrl+c to Exit\n");
 
   /* Create the state of the actual env */

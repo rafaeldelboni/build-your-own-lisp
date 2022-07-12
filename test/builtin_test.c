@@ -71,7 +71,8 @@ void test_eval_err(void) {
   lval_add(test_value_2, lval_long(1));
   lval_add(test_value_2, lval_long(2));
   lval *test_eval_2 = builtin_lval_eval(env, test_value_2);
-  TEST_ASSERT_EQUAL_STRING("First element is not a function",
+  TEST_ASSERT_EQUAL_STRING("S-Expression starts with incorrect type. Got "
+                           "Integer, Expected Function.",
                            test_eval_2->val_err);
   lval_del(test_eval_2);
 }

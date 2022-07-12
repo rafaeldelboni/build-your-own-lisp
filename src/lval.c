@@ -1,19 +1,28 @@
 #include "lval.h"
+#include "lenv.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 char *lval_ltype_name(int type) {
   switch (type) {
-    case LVAL_ERR: return "Error";
-    case LVAL_LONG: return "Integer";
-    case LVAL_DOUBLE: return "Float";
-    case LVAL_SYM: return "Symbol";
-    case LVAL_FUN: return "Function";
-    case LVAL_SEXPR: return "S-Expression";
-    case LVAL_QEXPR: return "Q-Expression";
-    default: return "Unknown";
+  case LVAL_ERR:
+    return "Error";
+  case LVAL_LONG:
+    return "Integer";
+  case LVAL_DOUBLE:
+    return "Float";
+  case LVAL_SYM:
+    return "Symbol";
+  case LVAL_FUN:
+    return "Function";
+  case LVAL_SEXPR:
+    return "S-Expression";
+  case LVAL_QEXPR:
+    return "Q-Expression";
+  default:
+    return "Unknown";
   };
 }
 
@@ -40,10 +49,28 @@ lval *lval_sym(char *s) {
 }
 
 // TODO: unit test
-lval *lval_fun(lbuiltin *func) {
+lval *lval_fun(lbuiltin func) {
   lval *value = malloc(sizeof(lval));
   value->type = LVAL_FUN;
-  value->val_fun = func;
+  value->val_fun.builtin = func;
+  return value;
+}
+
+// TODO: unit test
+lval *lval_lambda(lval *formals, lval *body) {
+  lval *value = malloc(sizeof(lval));
+  value->type = LVAL_FUN;
+
+  /* Set Builtin to Null */
+  value->val_fun.builtin = NULL;
+
+  /* Build new environment */
+  value->val_fun.env = lenv_new();
+
+  /* Set Formals and Body */
+  value->val_fun.formals = formals;
+  value->val_fun.body = body;
+
   return value;
 }
 
@@ -101,6 +128,11 @@ void lval_del(lval *value) {
   case LVAL_DOUBLE:
     break;
   case LVAL_FUN:
+    if (!value->val_fun.builtin) {
+      lenv_del(value->val_fun.env);
+      lval_del(value->val_fun.formals);
+      lval_del(value->val_fun.body);
+    }
     break;
 
   /* For Err or Sym free the string data */
@@ -134,7 +166,14 @@ lval *lval_copy(lval *value) {
 
   /* Copy Functions, Numbers and Floats Directly */
   case LVAL_FUN:
-    copy->val_fun = value->val_fun;
+    if (value->val_fun.builtin) {
+      copy->val_fun = value->val_fun;
+    } else {
+      copy->val_fun.builtin = NULL;
+      copy->val_fun.env = lenv_copy(value->val_fun.env);
+      copy->val_fun.formals = lval_copy(value->val_fun.formals);
+      copy->val_fun.body = lval_copy(value->val_fun.body);
+    }
     break;
   case LVAL_LONG:
     copy->val_long = value->val_long;
@@ -183,7 +222,15 @@ void lval_print(lval *value) {
     printf("%s", value->val_symbol);
     break;
   case LVAL_FUN:
-    printf("<function>");
+    if (value->val_fun.builtin) {
+      printf("<builtin>");
+    } else {
+      printf("(\\ ");
+      lval_print(value->val_fun.formals);
+      putchar(' ');
+      lval_print(value->val_fun.body);
+      putchar(')');
+    }
     break;
   case LVAL_SEXPR:
     lval_expr_print(value, '(', ')');
