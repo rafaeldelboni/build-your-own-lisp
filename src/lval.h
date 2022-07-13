@@ -43,6 +43,8 @@ typedef struct lval {
 
 char *lval_ltype_name(int type);
 
+int lval_eq(lval *x, lval *y);
+
 /* Create a new number type lval */
 lval *lval_long(long l);
 

@@ -26,6 +26,55 @@ char *lval_ltype_name(int type) {
   };
 }
 
+// TODO: unit tests
+int lval_eq(lval *x, lval *y) {
+  /* Different Types are always unequal */
+  if (x->type != y->type) {
+    return 0;
+  }
+
+  /* Compare Based upon type */
+  switch (x->type) {
+  /* Compare Numeric Value */
+  case LVAL_LONG:
+    return (x->val_long == y->val_long);
+  case LVAL_DOUBLE:
+    return (x->val_long == y->val_long);
+
+  /* Compare String Value */
+  case LVAL_ERR:
+    return (strcmp(x->val_err, y->val_err) == 0);
+  case LVAL_SYM:
+    return (strcmp(x->val_symbol, y->val_symbol) == 0);
+
+  /* If builtin compare, otherwise compare formals and body */
+  case LVAL_FUN:
+    if (x->val_fun.builtin || y->val_fun.builtin) {
+      return x->val_fun.builtin == y->val_fun.builtin;
+    } else {
+      return lval_eq(x->val_fun.formals, y->val_fun.formals) &&
+             lval_eq(x->val_fun.body, y->val_fun.body);
+    }
+
+  /* If list compare every individual element */
+  case LVAL_QEXPR:
+  case LVAL_SEXPR:
+    if (x->count != y->count) {
+      return 0;
+    }
+    for (int i = 0; i < x->count; i++) {
+      /* If any element not equal then whole list not equal */
+      if (!lval_eq(x->cell[i], y->cell[i])) {
+        return 0;
+      }
+    }
+    /* Otherwise lists must be equal */
+    return 1;
+    break;
+  }
+  return 0;
+}
+
 lval *lval_long(long l) {
   lval *value = malloc(sizeof(lval));
   value->type = LVAL_LONG;

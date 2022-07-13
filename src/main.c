@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   const char *language = " \
     float: /-?[0-9]+\\.[0-9]+/ ; \
     number: /-?[0-9]+/ ; \
-    symbol: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ; \
+    symbol: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&|]+/ ; \
     sexpr: '(' <expr>* ')' ;\
     qexpr: '{' <expr>* '}' ;\
     expr: <float> | <number> | <symbol> | <sexpr> | <qexpr> ; \
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
             Expr, Lispy);
 
   /* Print Version and Exit information */
-  puts("Lispy Version 0.0.12");
+  puts("Lispy Version 0.0.13");
   puts("Press Ctrl+c to Exit\n");
 
   /* Create the state of the actual env */

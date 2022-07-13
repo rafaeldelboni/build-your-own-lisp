@@ -1,6 +1,24 @@
 #include "lenv.h"
 #include "lval.h"
 
+lval *builtin_ord(lenv *env, lval *arg, char *op);
+
+lval *builtin_gt(lenv *env, lval *arg);
+
+lval *builtin_lt(lenv *env, lval *arg);
+
+lval *builtin_ge(lenv *env, lval *arg);
+
+lval *builtin_le(lenv *env, lval *arg);
+
+lval *builtin_cmp(lenv *env, lval *arg, char *op);
+
+lval *builtin_if(lenv *env, lval *arg);
+
+lval *builtin_or(lenv *env, lval *arg);
+
+lval *builtin_and(lenv *env, lval *arg);
+
 lval *builtin_head(lenv *env, lval *arg);
 
 lval *builtin_tail(lenv *env, lval *arg);

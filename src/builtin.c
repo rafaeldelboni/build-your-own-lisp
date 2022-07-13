@@ -18,6 +18,14 @@
           func, index, lval_ltype_name(args->cell[index]->type),               \
           lval_ltype_name(expect));
 
+#define LASSERT_NUMERIC(func, args, index)                                     \
+  LASSERT(args,                                                                \
+          args->cell[index]->type == LVAL_LONG ||                              \
+              args->cell[index]->type == LVAL_DOUBLE,                          \
+          "Function '%s' passed incorrect type for argument %i. Got %s, "      \
+          "Expected numeric value (Integer or Float).",                        \
+          func, index, lval_ltype_name(args->cell[index]->type));
+
 #define LASSERT_NUM(func, args, num)                                           \
   LASSERT(args, args->count == num,                                            \
           "Function '%s' passed incorrect number of arguments. Got %i, "       \
@@ -27,6 +35,155 @@
 #define LASSERT_NOT_EMPTY(func, args, index)                                   \
   LASSERT(args, args->cell[index]->count != 0,                                 \
           "Function '%s' passed {} for argument %i.", func, index);
+
+// TODO: unit test
+lval *builtin_ord(lenv *env, lval *arg, char *op) {
+  LASSERT_NUM(op, arg, 2);
+  LASSERT_NUMERIC(op, arg, 0);
+  LASSERT_NUMERIC(op, arg, 1);
+
+  lval *x = lval_pop(arg, 0);
+  lval *y = lval_pop(arg, 0);
+  lval_del(arg);
+
+  int double_result = x->type == LVAL_DOUBLE || y->type == LVAL_DOUBLE;
+  long x_double = x->type == LVAL_LONG ? (double)x->val_long : x->val_double;
+  long y_double = y->type == LVAL_LONG ? (double)y->val_long : y->val_double;
+
+  double result;
+
+  if (strcmp(op, ">") == 0) {
+    result = (x_double > y_double);
+  }
+
+  if (strcmp(op, "<") == 0) {
+    result = (x_double < y_double);
+  }
+
+  if (strcmp(op, ">=") == 0) {
+    result = (x_double >= y_double);
+  }
+
+  if (strcmp(op, "<=") == 0) {
+    result = (x_double <= y_double);
+  }
+
+  lval_del(x);
+  lval_del(y);
+
+  return double_result ? lval_double(result) : lval_long((long)result);
+}
+
+// TODO: unit test
+lval *builtin_gt(lenv *env, lval *arg) { return builtin_ord(env, arg, ">"); }
+
+// TODO: unit test
+lval *builtin_lt(lenv *env, lval *arg) { return builtin_ord(env, arg, "<"); }
+
+// TODO: unit test
+lval *builtin_ge(lenv *env, lval *arg) { return builtin_ord(env, arg, ">="); }
+
+// TODO: unit test
+lval *builtin_le(lenv *env, lval *arg) { return builtin_ord(env, arg, "<="); }
+
+// TODO: unit test
+lval *builtin_cmp(lenv *env, lval *arg, char *op) {
+  LASSERT_NUM(op, arg, 2);
+
+  lval *x = lval_pop(arg, 0);
+  lval *y = lval_pop(arg, 0);
+  lval_del(arg);
+
+  int result;
+
+  if (strcmp(op, "==") == 0) {
+    result = lval_eq(x, y);
+  }
+
+  if (strcmp(op, "!=") == 0) {
+    result = !lval_eq(x, y);
+  }
+
+  lval_del(x);
+  lval_del(y);
+
+  return lval_long(result);
+}
+
+// TODO: unit test
+lval *builtin_eq(lenv *env, lval *arg) { return builtin_cmp(env, arg, "=="); }
+
+// TODO: unit test
+lval *builtin_ne(lenv *env, lval *arg) { return builtin_cmp(env, arg, "!="); }
+
+// TODO: unit test
+lval *builtin_if(lenv *env, lval *arg) {
+  LASSERT_NUM("if", arg, 3);
+  LASSERT_TYPE("if", arg, 0, LVAL_LONG);
+  LASSERT_TYPE("if", arg, 1, LVAL_QEXPR);
+  LASSERT_TYPE("if", arg, 2, LVAL_QEXPR);
+
+  /* Mark Both Expressions as evaluable */
+  lval *result;
+  arg->cell[1]->type = LVAL_SEXPR;
+  arg->cell[2]->type = LVAL_SEXPR;
+
+  if (arg->cell[0]->val_long) {
+    /* If condition is true evaluate first expression */
+    result = builtin_lval_eval(env, lval_pop(arg, 1));
+  } else {
+    /* Otherwise evaluate second expression */
+    result = builtin_lval_eval(env, lval_pop(arg, 2));
+  }
+
+  /* Delete argument list and return */
+  lval_del(arg);
+  return result;
+}
+
+// TODO: unit test
+lval *builtin_or(lenv *env, lval *arg) {
+  for (int i = 0; i < arg->count; i++) {
+    LASSERT_TYPE("||", arg, i, LVAL_LONG);
+  }
+
+  int result = lval_pop(arg, 0)->val_long;
+  for (int i = 0; i < arg->count; i++) {
+    result = result || arg->cell[i]->val_long;
+  }
+
+  lval_del(arg);
+
+  return lval_long(result);
+}
+
+// TODO: unit test
+lval *builtin_and(lenv *env, lval *arg) {
+  for (int i = 0; i < arg->count; i++) {
+    LASSERT_TYPE("&&", arg, i, LVAL_LONG);
+  }
+
+  int result = lval_pop(arg, 0)->val_long;
+  for (int i = 0; i < arg->count; i++) {
+    result = result && arg->cell[i]->val_long;
+  }
+
+  lval_del(arg);
+
+  return lval_long(result);
+}
+
+// TODO: unit test
+lval *builtin_not(lenv *env, lval *arg) {
+  LASSERT_NUM("!", arg, 1);
+  LASSERT_TYPE("!", arg, 0, LVAL_LONG);
+
+  int result = !lval_pop(arg, 0)->val_long;
+
+  lval_del(arg);
+
+  return lval_long(result);
+}
 
 lval *builtin_head(lenv *env, lval *arg) {
   LASSERT_NUM("head", arg, 1);
@@ -91,12 +248,7 @@ lval *builtin_join(lenv *env, lval *arg) {
 
 lval *builtin_cons(lenv *env, lval *arg) {
   LASSERT_NUM("cons", arg, 2);
-  LASSERT(arg,
-          arg->cell[0]->type == LVAL_LONG || arg->cell[0]->type == LVAL_DOUBLE,
-          "Function 'cons' passed incorrect type for argument 0. Got %s, "
-          "Expected %s or %s.",
-          lval_ltype_name(arg->cell[0]->type), lval_ltype_name(LVAL_LONG),
-          lval_ltype_name(LVAL_DOUBLE));
+  LASSERT_NUMERIC("const", arg, 0);
   LASSERT_TYPE("cons", arg, 1, LVAL_QEXPR);
   LASSERT_NOT_EMPTY("cons", arg, 1);
 
@@ -351,6 +503,18 @@ void builtin_default_functions(lenv *env) {
   /* Variable Functions */
   lenv_add_builtin(env, "def", builtin_def);
   lenv_add_builtin(env, "\\", builtin_lambda);
+
+  /* Comparison Functions */
+  lenv_add_builtin(env, "if", builtin_if);
+  lenv_add_builtin(env, "||", builtin_or);
+  lenv_add_builtin(env, "&&", builtin_and);
+  lenv_add_builtin(env, "!", builtin_not);
+  lenv_add_builtin(env, "==", builtin_eq);
+  lenv_add_builtin(env, "!=", builtin_ne);
+  lenv_add_builtin(env, ">", builtin_gt);
+  lenv_add_builtin(env, "<", builtin_lt);
+  lenv_add_builtin(env, ">=", builtin_ge);
+  lenv_add_builtin(env, "<=", builtin_le);
 }
 
 lval *lval_call(lenv *env, lval *func, lval *args) {
