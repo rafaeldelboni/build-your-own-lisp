@@ -1,5 +1,6 @@
 #include "lenv.h"
 #include "lval.h"
+#include "mpc.h"
 
 lval *builtin_ord(lenv *env, lval *arg, char *op);
 
@@ -43,6 +44,10 @@ lval *builtin_eval(lenv *env, lval *arg);
 
 lval *builtin_lambda(lenv *env, lval *arg);
 
+lval *builtin_print(lenv *env, lval *arg);
+
+lval *builtin_error(lenv *env, lval *arg);
+
 lval *builtin_op(lenv *env, lval *value, char *op);
 
 lval *builtin_eval_op(lval *x, char *op, lval *y);
@@ -54,4 +59,3 @@ lval *builtin_lval_call(lenv *env, lval *func, lval *arg);
 lval *builtin_lval_eval(lenv *env, lval *value);
 
 lval *builtin_lval_eval_sexpr(lenv *env, lval *value);
-

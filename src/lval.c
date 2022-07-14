@@ -1,5 +1,6 @@
 #include "lval.h"
 #include "lenv.h"
+#include "mpc.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,8 @@ char *lval_ltype_name(int type) {
     return "Float";
   case LVAL_SYM:
     return "Symbol";
+  case LVAL_STR:
+    return "String";
   case LVAL_FUN:
     return "Function";
   case LVAL_SEXPR:
@@ -46,6 +49,8 @@ int lval_eq(lval *x, lval *y) {
     return (strcmp(x->val_err, y->val_err) == 0);
   case LVAL_SYM:
     return (strcmp(x->val_symbol, y->val_symbol) == 0);
+  case LVAL_STR:
+    return (strcmp(x->val_string, y->val_string) == 0);
 
   /* If builtin compare, otherwise compare formals and body */
   case LVAL_FUN:
@@ -94,6 +99,15 @@ lval *lval_sym(char *s) {
   value->type = LVAL_SYM;
   value->val_symbol = malloc(strlen(s) + 1);
   strcpy(value->val_symbol, s);
+  return value;
+}
+
+// TODO: unit test
+lval *lval_str(char *s) {
+  lval *value = malloc(sizeof(lval));
+  value->type = LVAL_STR;
+  value->val_string = malloc(strlen(s) + 1);
+  strcpy(value->val_string, s);
   return value;
 }
 
@@ -191,6 +205,9 @@ void lval_del(lval *value) {
   case LVAL_SYM:
     free(value->val_symbol);
     break;
+  case LVAL_STR:
+    free(value->val_string);
+    break;
 
   /* If Sexpr or Qexpr then delete all elements inside */
   case LVAL_SEXPR:
@@ -242,6 +259,11 @@ lval *lval_copy(lval *value) {
     strcpy(copy->val_symbol, value->val_symbol);
     break;
 
+  case LVAL_STR:
+    copy->val_string = malloc(strlen(value->val_string) + 1);
+    strcpy(copy->val_string, value->val_string);
+    break;
+
   /* Copy Lists by copying each sub-expression */
   case LVAL_SEXPR:
   case LVAL_QEXPR:
@@ -254,6 +276,19 @@ lval *lval_copy(lval *value) {
   }
 
   return copy;
+}
+
+// TODO: unit test
+void lval_print_str(lval *value) {
+  /* Make a Copy of the string */
+  char *escaped = malloc(strlen(value->val_string) + 1);
+  strcpy(escaped, value->val_string);
+  /* Pass it through the escape function */
+  escaped = mpcf_escape(escaped);
+  /* Print it between " characters */
+  printf("\"%s\"", escaped);
+  /* free the copied string */
+  free(escaped);
 }
 
 void lval_print(lval *value) {
@@ -269,6 +304,9 @@ void lval_print(lval *value) {
     break;
   case LVAL_SYM:
     printf("%s", value->val_symbol);
+    break;
+  case LVAL_STR:
+    lval_print_str(value);
     break;
   case LVAL_FUN:
     if (value->val_fun.builtin) {

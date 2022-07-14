@@ -1,3 +1,6 @@
+#ifndef LENV_HEADER_H
+#define LENV_HEADER_H
+
 #include "lval.h"
 
 struct lenv {
@@ -20,3 +23,5 @@ lenv *lenv_copy(lenv *env);
 void lenv_def(lenv *env, lval *symbol, lval *value);
 
 void lenv_add_builtin(lenv *env, char *name, lbuiltin func);
+
+#endif // LENV_HEADER_H

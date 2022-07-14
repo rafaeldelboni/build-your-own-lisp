@@ -1,0 +1,2 @@
+(def {x y} 100 200)
+(if (== x y) { print "aaaaaaaa" } { print "bbbbbbb" })

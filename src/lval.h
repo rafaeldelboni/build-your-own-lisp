@@ -1,6 +1,8 @@
 #ifndef LVAL_HEADER_H
 #define LVAL_HEADER_H
 
+#include "mpc.h"
+
 struct lval;
 struct lenv;
 typedef struct lval lval;
@@ -12,6 +14,7 @@ enum {
   LVAL_LONG,
   LVAL_DOUBLE,
   LVAL_SYM,
+  LVAL_STR,
   LVAL_FUN,
   LVAL_SEXPR,
   LVAL_QEXPR
@@ -27,7 +30,7 @@ typedef struct lval {
     long val_long;
     double val_double;
     char *val_symbol;
-    // lbuiltin val_fun;
+    char *val_string;
     char *val_err;
     struct {
       lbuiltin builtin;
@@ -56,6 +59,9 @@ lval *lval_err(char *fmt, ...);
 
 /* Construct a pointer to a new Symbol lval */
 lval *lval_sym(char *s);
+
+/* Construct a pointer to a new String lval */
+lval *lval_str(char *s);
 
 /* Construct a pointer to a new Function lval */
 lval *lval_fun(lbuiltin func);

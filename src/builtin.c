@@ -344,6 +344,31 @@ lval *builtin_lambda(lenv *env, lval *arg) {
   return lval_lambda(formals, body);
 }
 
+lval *builtin_print(lenv *env, lval *arg) {
+  /* Print each argument followed by a space */
+  for (int i = 0; i < arg->count; i++) {
+    lval_print(arg->cell[i]);
+    putchar(' ');
+  }
+  /* Print a newline and delete arguments*/
+  putchar('\n');
+  lval_del(arg);
+
+  return lval_sexpr();
+}
+
+lval *builtin_error(lenv *env, lval *arg) {
+  LASSERT_NUM("error", arg, 1);
+  LASSERT_TYPE("error", arg, 0, LVAL_STR);
+
+  /* Construct Error from first argument */
+  lval *err = lval_err(arg->cell[0]->val_string);
+
+  /* Delete arguments and return */
+  lval_del(arg);
+  return err;
+}
+
 lval *builtin_eval_op(lval *x, char *op, lval *y) {
   int double_result = x->type == LVAL_DOUBLE || y->type == LVAL_DOUBLE;
 
@@ -515,6 +540,11 @@ void builtin_default_functions(lenv *env) {
   lenv_add_builtin(env, "<", builtin_lt);
   lenv_add_builtin(env, ">=", builtin_ge);
   lenv_add_builtin(env, "<=", builtin_le);
+
+  /* String Functions */
+  /*lenv_add_builtin(env, "load", builtin_load);*/
+  lenv_add_builtin(env, "error", builtin_error);
+  lenv_add_builtin(env, "print", builtin_print);
 }
 
 lval *lval_call(lenv *env, lval *func, lval *args) {
