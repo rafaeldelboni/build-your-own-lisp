@@ -542,6 +542,7 @@ void builtin_default_functions(lenv *env) {
   lenv_add_builtin(env, "<=", builtin_le);
 
   /* String Functions */
+  // TODO: make a way to pass the parser not using a global var
   /*lenv_add_builtin(env, "load", builtin_load);*/
   lenv_add_builtin(env, "error", builtin_error);
   lenv_add_builtin(env, "print", builtin_print);
