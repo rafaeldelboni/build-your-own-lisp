@@ -1,21 +1,31 @@
-#include "builtin.h"
-#include "lispy.h"
 #include "lval.h"
+#include "lispy.h"
+#include "builtin.h"
 #include "mpc.h"
 #include <editline/readline.h>
 #include <stdio.h>
 
+mpc_parser_t *Float;
+mpc_parser_t *Number;
+mpc_parser_t *Symbol;
+mpc_parser_t *String;
+mpc_parser_t *Comment;
+mpc_parser_t *Sexpr;
+mpc_parser_t *Qexpr;
+mpc_parser_t *Expr;
+mpc_parser_t *Lispy;
+
 int main(int argc, char **argv) {
   /* Create Some Parsers */
-  mpc_parser_t *Float = mpc_new("float");
-  mpc_parser_t *Number = mpc_new("number");
-  mpc_parser_t *Symbol = mpc_new("symbol");
-  mpc_parser_t *String = mpc_new("string");
-  mpc_parser_t *Comment = mpc_new("comment");
-  mpc_parser_t *Sexpr = mpc_new("sexpr");
-  mpc_parser_t *Qexpr = mpc_new("qexpr");
-  mpc_parser_t *Expr = mpc_new("expr");
-  mpc_parser_t *Lispy = mpc_new("lispy");
+  Float = mpc_new("float");
+  Number = mpc_new("number");
+  Symbol = mpc_new("symbol");
+  String = mpc_new("string");
+  Comment = mpc_new("comment");
+  Sexpr = mpc_new("sexpr");
+  Qexpr = mpc_new("qexpr");
+  Expr = mpc_new("expr");
+  Lispy = mpc_new("lispy");
 
   const char *language = " \
     float: /-?[0-9]+\\.[0-9]+/ ; \
@@ -36,7 +46,7 @@ int main(int argc, char **argv) {
 
   /* Create the state of the actual env */
   lenv *env = lenv_new();
-  builtin_default_functions(env);
+  lispy_builtin_default_functions(env);
 
   /* Interactive prompt */
   if (argc == 1) {
@@ -78,7 +88,7 @@ int main(int argc, char **argv) {
       /* Argument list with a single argument, the filename */
       lval *args = lval_add(lval_sexpr(), lval_str(argv[i]));
       /* Pass to builtin load and get the result */
-      lval *result = lispy_load(env, args, Lispy);
+      lval *result = lispy_load(env, args);
 
       /* If the result is an error be sure to print it */
       if (result->type == LVAL_ERR) {

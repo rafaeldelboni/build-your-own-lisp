@@ -504,50 +504,6 @@ lval *builtin_max(lenv *env, lval *value) {
   return builtin_op(env, value, "max");
 }
 
-void builtin_default_functions(lenv *env) {
-  /* List Functions */
-  lenv_add_builtin(env, "head", builtin_head);
-  lenv_add_builtin(env, "tail", builtin_tail);
-  lenv_add_builtin(env, "list", builtin_list);
-  lenv_add_builtin(env, "join", builtin_join);
-  lenv_add_builtin(env, "cons", builtin_cons);
-  lenv_add_builtin(env, "len", builtin_len);
-  lenv_add_builtin(env, "init", builtin_init);
-  lenv_add_builtin(env, "eval", builtin_eval);
-
-  /* Math Functions */
-  lenv_add_builtin(env, "+", builtin_add);
-  lenv_add_builtin(env, "-", builtin_sub);
-  lenv_add_builtin(env, "*", builtin_mul);
-  lenv_add_builtin(env, "/", builtin_div);
-  lenv_add_builtin(env, "%", builtin_rest);
-  lenv_add_builtin(env, "^", builtin_pow);
-  lenv_add_builtin(env, "min", builtin_min);
-  lenv_add_builtin(env, "max", builtin_max);
-
-  /* Variable Functions */
-  lenv_add_builtin(env, "def", builtin_def);
-  lenv_add_builtin(env, "\\", builtin_lambda);
-
-  /* Comparison Functions */
-  lenv_add_builtin(env, "if", builtin_if);
-  lenv_add_builtin(env, "||", builtin_or);
-  lenv_add_builtin(env, "&&", builtin_and);
-  lenv_add_builtin(env, "!", builtin_not);
-  lenv_add_builtin(env, "==", builtin_eq);
-  lenv_add_builtin(env, "!=", builtin_ne);
-  lenv_add_builtin(env, ">", builtin_gt);
-  lenv_add_builtin(env, "<", builtin_lt);
-  lenv_add_builtin(env, ">=", builtin_ge);
-  lenv_add_builtin(env, "<=", builtin_le);
-
-  /* String Functions */
-  // TODO: make a way to pass the parser not using a global var
-  /*lenv_add_builtin(env, "load", builtin_load);*/
-  lenv_add_builtin(env, "error", builtin_error);
-  lenv_add_builtin(env, "print", builtin_print);
-}
-
 lval *lval_call(lenv *env, lval *func, lval *args) {
   /* If Builtin then simply apply that */
   if (func->val_fun.builtin) {

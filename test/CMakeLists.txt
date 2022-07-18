@@ -15,7 +15,7 @@ set(Tests
 # 2. Declare dependencies of each test file
 set(lispy_test_deps lispy)
 set(lval_test_deps lval)
-set(builtin_test_deps builtin)
+set(builtin_test_deps builtin lispy)
 
 # 3. Add dependencies to a list, need to be in the same order as item 1
 set(Dependencies

@@ -50,9 +50,29 @@ lval *builtin_error(lenv *env, lval *arg);
 
 lval *builtin_op(lenv *env, lval *value, char *op);
 
-lval *builtin_eval_op(lval *x, char *op, lval *y);
+lval *builtin_add(lenv *env, lval *value);
 
-void builtin_default_functions(lenv *env);
+lval *builtin_sub(lenv *env, lval *value);
+
+lval *builtin_mul(lenv *env, lval *value);
+
+lval *builtin_div(lenv *env, lval *value);
+
+lval *builtin_rest(lenv *env, lval *value);
+
+lval *builtin_pow(lenv *env, lval *value);
+
+lval *builtin_min(lenv *env, lval *value);
+
+lval *builtin_max(lenv *env, lval *value);
+
+lval *builtin_not(lenv *env, lval *arg);
+
+lval *builtin_eq(lenv *env, lval *arg);
+
+lval *builtin_ne(lenv *env, lval *arg);
+
+lval *builtin_eval_op(lval *x, char *op, lval *y);
 
 lval *builtin_lval_call(lenv *env, lval *func, lval *arg);
 

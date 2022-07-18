@@ -1,12 +1,14 @@
+#include "lispy.h"
 #include "builtin.h"
 #include "unity.h"
 #include <stdlib.h>
 
 lenv *env;
+mpc_parser_t *Lispy;
 
 void setUp(void) {
   env = lenv_new();
-  builtin_default_functions(env);
+  lispy_builtin_default_functions(env);
 }
 
 void tearDown(void) { lenv_del(env); }
